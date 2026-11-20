@@ -292,7 +292,7 @@ class GaussianDiffusion(nn.Module):
         if clip_denoised:
             x_start.clamp_(-1., 1.)
 
-        sigma = torch.Tensor([0]).cuda()
+        sigma = torch.Tensor([0]).to(x.device)
         # sigma = 0.5 * sigma
         noise = torch.randn_like(x)
 
@@ -418,7 +418,7 @@ class DDIM_GaussianDiffusion(nn.Module):
         # else:
         #     sigma = (torch.sqrt(1 - self.alphas_cumprod[t]) / self.sqrt_one_minus_alphas_cumprod[t+20]) * \
         #             (self.sqrt_one_minus_alphas_cumprod[t+20] / torch.sqrt(self.alphas_cumprod[t]))
-        sigma = torch.Tensor([0]).to("cuda:0")
+        sigma = torch.Tensor([0]).to(x.device)
         # sigma = 0.5 * sigma
         noise = torch.randn_like(x)
 
@@ -463,9 +463,18 @@ class DDIM_GaussianDiffusion(nn.Module):
 
 
 if __name__ == "__main__":
-    model = create_sr256_unet().cuda()
+    from models.unet import create_unet
+    from models.prior_net import Prior_Extraction_Network
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = create_unet().to(device)
+    prior_net = Prior_Extraction_Network().to(device)
     scheduler = GaussianDiffusion(denoise_fn=model, image_size=256)
-    HR = torch.Tensor(2, 3, 256, 256).to("cuda:0")
-    LR = torch.Tensor(2, 3, 256, 256).to("cuda:0")
-    data = {'HR': HR, 'MOS': LR}
-    loss = scheduler.p_losses(data)
+
+    HR = torch.randn(2, 3, 256, 256, device=device)
+    LR = torch.randn(2, 3, 256, 256, device=device)
+    k_value = prior_net(LR)
+    loss = scheduler.p_losses({'HR': HR, 'MOS': LR}, k_value)
+    print('diffusion loss', float(loss))
+    out = scheduler.ddim_super_resolution(LR, k_value)
+    print('ddim output', tuple(out.shape))
