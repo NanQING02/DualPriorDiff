@@ -125,13 +125,29 @@ Prints the average PSNR, SSIM and LPIPS over the image pairs found in both folde
 
 ## Checkpoints
 
-Trained weights for CelebA-HQ (256x256) are available from Zenodo:
+Pretrained weights for CelebA-HQ (256x256) are archived on Zenodo:
 
-> **https://doi.org/10.5281/zenodo.XXXXXXX**  <!-- replace after uploading to Zenodo -->
+> **https://doi.org/10.5281/zenodo.24384638**
 
-Each release contains the denoising network and the prior network of the reported
-model. Download both files and pass them to `sample.py` through `--weights` and
-`--priori_weights`.
+The record contains the denoising network and the prior network of the reported
+model:
+
+| File | Used by |
+| --- | --- |
+| `DualPriorDiff_denoise_epoch180.pth` | `sample.py --weights` |
+| `DualPriorDiff_prior_epoch180.pth` | `sample.py --priori_weights` |
+
+Download both files and point the two options at them:
+
+```bash
+python sample.py \
+    --masked_dir     /path/to/test/center \
+    --weights        /path/to/DualPriorDiff_denoise_epoch180.pth \
+    --priori_weights /path/to/DualPriorDiff_prior_epoch180.pth \
+    --output_dir     results/celeba_hq/center
+```
+
+If you use these weights, please cite the paper and the Zenodo record.
 
 ## Ablation configurations
 
