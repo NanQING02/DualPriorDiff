@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.idea/
+.vscode/
+
+# checkpoints and training output are not tracked
+weights/
+priori_weights/
+training_results/
+results/
+loss_statistics/
